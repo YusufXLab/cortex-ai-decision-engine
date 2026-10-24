@@ -401,6 +401,45 @@ The list of tools stored on `CortexState.selected_tools` drives later decision m
 
 ---
 
+## 📚 Sixth AI Decision Module: ContextSelectionDecider (Strands Decider 2B)
+
+`ContextSelectionDecider` is the sixth production AI decision module in the pipeline. It runs immediately after `ToolSelectionDecider`.
+
+It answers **EXACTLY ONE** question:
+> *"What specific information should be retrieved and injected into the foundation model prompt context?"*
+
+### Why Context Selection is Different from Tool Selection
+- **Tool Selection (Module 5)** answers: *"**WHAT** capabilities are required?"* (e.g. `WEB_SEARCH`, `FILE_READER`, `RAG`, `DATABASE`).
+- **Context Selection (Module 6)** answers: *"**WHAT INFORMATION** should the model actually receive?"* (e.g. `["WEB_RESULTS", "RAG_KNOWLEDGE_BASE"]` vs `["SYSTEM_PROMPT_ONLY"]`).
+
+A tool represents an execution mechanism; a context source represents an ingested knowledge payload:
+- A tool like `WEB_SEARCH` can execute a search query, but `ContextSelectionDecider` determines whether the search snippets (`WEB_RESULTS`) need to be injected into the prompt, or if cached `USER_MEMORY` is sufficient.
+- For purely algorithmic or creative prompts (*"Write a Python script to compute Fibonacci recursively"*), no external context is needed, and `ContextSelectionDecider` selects `["SYSTEM_PROMPT_ONLY"]`.
+
+### The 8 Allowed Context Sources (Supports Multi-Source Injection)
+Strands Decider 2B returns a **list of context sources** (`list[ContextSourceType]`):
+1. `NONE`: No external context. Equivalent to `SYSTEM_PROMPT_ONLY`.
+2. `CHAT_HISTORY`: Conversational turns from preceding interactions in the active session.
+3. `USER_MEMORY`: User-specific preferences, profile parameters, or cross-session persistent facts.
+4. `UPLOADED_FILES`: Local files, documents, PDFs, or CSV spreadsheets provided by the user.
+5. `RAG_KNOWLEDGE_BASE`: Indexed vector embeddings and documentation chunks from enterprise knowledge bases.
+6. `WEB_RESULTS`: External real-time search snippets or web page text retrieved from internet search.
+7. `DATABASE_RESULTS`: Records, schemas, or query results retrieved from transactional or analytical databases.
+8. `SYSTEM_PROMPT_ONLY`: Pure standalone prompt evaluation with zero injected external knowledge or history.
+
+Examples of returned lists:
+- `["UPLOADED_FILES"]`
+- `["CHAT_HISTORY", "USER_MEMORY"]`
+- `["WEB_RESULTS", "RAG_KNOWLEDGE_BASE"]`
+- `["SYSTEM_PROMPT_ONLY"]`
+
+### How This Module Optimizes Tokens, Cost, and Latency
+1. **Token Window Reduction**: Frontier models (Amazon Bedrock Claude 3.5 Sonnet) charge per input token. Injecting 50k tokens of unpruned context costs money and degrades time-to-first-token (TTFT). Pruning context down to strictly necessary sources reduces cost by 40–80%.
+2. **Elimination of Unnecessary Retrieval**: Bypasses expensive vector database queries, internet search queries, or disk I/O when `SYSTEM_PROMPT_ONLY` is selected.
+3. **Mitigating "Lost-in-the-Middle" Hallucinations**: Overwhelming LLMs with irrelevant background facts degrades attention. Injecting only verified relevant context sources enhances output accuracy.
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

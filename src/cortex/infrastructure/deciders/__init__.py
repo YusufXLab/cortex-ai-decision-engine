@@ -3,11 +3,14 @@
 from cortex.infrastructure.deciders.agent_decider import AgentSelectionDecider
 from cortex.infrastructure.deciders.base import BaseDecisionModule
 from cortex.infrastructure.deciders.client import StrandsDeciderClient
+from cortex.infrastructure.deciders.context_decider import (
+    ContextDecider,
+    ContextSelectionDecider,
+)
 from cortex.infrastructure.deciders.intent_decider import IntentDecider
 from cortex.infrastructure.deciders.placeholders import (
     ComplexityDecider,
     ConfidenceDecider,
-    ContextDecider,
     CostStrategyDecider,
     ModelSelectionDecider,
     VisionRequirementDecider,
@@ -23,6 +26,7 @@ __all__ = [
     "ComplexityDecider",
     "ConfidenceDecider",
     "ContextDecider",
+    "ContextSelectionDecider",
     "CostStrategyDecider",
     "IntentDecider",
     "ModelSelectionDecider",

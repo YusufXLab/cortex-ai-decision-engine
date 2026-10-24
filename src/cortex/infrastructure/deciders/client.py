@@ -260,6 +260,33 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                 "reasoning": f"[Strands Decider 2B Tool Selector]: Selected capabilities {valid_tools} to fulfill task requirements.",
             }
 
+        if task == "context_selection":
+            selected_sources: list[str] = []
+
+            if any(k in lowered for k in ["file", "pdf", "csv", "document", "upload", "attachment", "read doc"]):
+                selected_sources.append("UPLOADED_FILES")
+            if any(k in lowered for k in ["history", "previous message", "earlier", "chat", "follow-up"]):
+                selected_sources.append("CHAT_HISTORY")
+            if any(k in lowered for k in ["my preference", "remember", "user memory", "profile"]):
+                selected_sources.append("USER_MEMORY")
+            if any(k in lowered for k in ["internal doc", "knowledge base", "rag", "wiki", "handbook"]):
+                selected_sources.append("RAG_KNOWLEDGE_BASE")
+            if any(k in lowered for k in ["web", "search", "latest", "news", "google", "recent"]):
+                selected_sources.append("WEB_RESULTS")
+            if any(k in lowered for k in ["database", "sql", "records", "table query"]):
+                selected_sources.append("DATABASE_RESULTS")
+
+            if not selected_sources:
+                selected_sources = ["SYSTEM_PROMPT_ONLY"]
+
+            valid_sources = [s for s in selected_sources if s in allowed_choices] or ["SYSTEM_PROMPT_ONLY"]
+
+            return {
+                "decision": valid_sources,
+                "confidence": 0.96,
+                "reasoning": f"[Strands Decider 2B Context Selector]: Selected context sources {valid_sources} to optimize token window.",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"
