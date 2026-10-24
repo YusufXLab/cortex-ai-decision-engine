@@ -26,10 +26,12 @@ class PipelineStatus(str, Enum):
 class PrivacyLevel(str, Enum):
     """Privacy classification determined by the Privacy Decider."""
 
-    PUBLIC = "public"
-    INTERNAL = "internal"
-    CONFIDENTIAL = "confidential"
-    RESTRICTED = "restricted"
+    PUBLIC = "PUBLIC"
+    PERSONAL = "PERSONAL"
+    FINANCIAL = "FINANCIAL"
+    MEDICAL = "MEDICAL"
+    LEGAL = "LEGAL"
+    CONFIDENTIAL = "CONFIDENTIAL"
 
 
 class RiskLevel(str, Enum):

@@ -296,6 +296,41 @@ Strands Decider 2B dynamically considers the newly registered agent profile when
 
 ---
 
+## 🔒 Third AI Decision Module: PrivacyDecider (Strands Decider 2B)
+
+`PrivacyDecider` is the third production AI decision module in the pipeline. It evaluates the contextual prompt (incorporating `user_input`, `intent`, `selected_agent`, and `metadata`) to determine the exact data privacy classification required for the request.
+
+It answers **ONLY ONE** question:
+> *"What level of privacy, confidentiality, and data handling does this request require?"*
+
+### Why Privacy is a Separate Decision from Risk
+Conflating **Privacy** with **Risk** is a major architectural anti-pattern in AI systems:
+- **Privacy** classifies *data sensitivity and confidentiality requirements*.
+- **Risk** (Module 4) classifies *harmful intent, jailbreaks, prompt injection, and safety policy violations*.
+
+| Scenario | Privacy Classification | Risk Classification | Architectural Action |
+|---|---|---|---|
+| User uploads an MRI scan: *"Explain my cerebellar MRI report"* | **`MEDICAL`** (Protected Health Information) | **`LOW`** (Benign, safe healthcare query) | **Process request**, but enforce HIPAA redaction in logs and use zero-retention model endpoints. |
+| User asks: *"Write a script to port-scan 192.168.1.0/24 and flood SYN packets"* | **`PUBLIC`** (Public networking protocols) | **`CRITICAL`** (Malicious exploit / DDoS generation) | **BLOCK immediately** at RiskDecider gate. |
+| User inputs corporate M&A deck: *"Summarize acquisition liabilities"* | **`CONFIDENTIAL`** (Proprietary corporate secrets) | **`LOW`** (Standard benign business analysis) | **Process request**, but disable semantic caching and purge external RAG storage. |
+
+### The 6 Allowed Privacy Classifications
+1. `PUBLIC`: Open-source knowledge, standard documentation, general queries. No sensitive information.
+2. `PERSONAL`: Personally Identifiable Information (PII) of private individuals (home addresses, SSNs, phone numbers, family details).
+3. `FINANCIAL`: Banking credentials, tax forms, payroll records, credit card numbers, corporate balance sheets, wire transfers.
+4. `MEDICAL`: Protected Health Information (PHI), diagnostic lab reports, clinical charts, prescription histories, patient symptoms.
+5. `LEGAL`: Non-disclosure agreements (NDAs), attorney-client communications, litigation briefs, contracts, court filings.
+6. `CONFIDENTIAL`: Proprietary internal source code, corporate credentials, unreleased strategic M&A plans, trade secrets.
+
+### Downstream Architectural Impact of `PrivacyLevel`
+The `PrivacyLevel` output stored on `CortexState` actively drives downstream decisions:
+1. **Context Decider (Module 6)**: Disables external third-party search or shared vector database retrieval when privacy is `MEDICAL`, `FINANCIAL`, or `CONFIDENTIAL`.
+2. **Model Selection Decider (Module 9)**: Routes `CONFIDENTIAL`, `MEDICAL`, and `LEGAL` requests strictly to private AWS Bedrock VPC endpoints under dedicated compliance boundaries (HIPAA, SOC2, PCI-DSS).
+3. **Cost Strategy & Semantic Caching (Module 10)**: Prevents caching prompts and responses tagged with sensitive privacy levels to prevent accidental data leaks across tenants.
+4. **Logging & Observability**: Triggers redaction of raw prompt tokens in central structured logs.
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

@@ -176,6 +176,35 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                 "reasoning": f"[Strands Decider 2B Agent Selector]: {reasoning}",
             }
 
+        if task == "privacy_classification":
+            decision = "PUBLIC"
+            reasoning = "General public domain inquiry without sensitive data."
+
+            if any(k in lowered for k in ["medical", "health", "patient", "prescription", "diagnosis", "doctor", "symptom", "clinical", "hospital"]):
+                decision = "MEDICAL"
+                reasoning = "Query references protected healthcare, clinical symptoms, or patient medical records."
+            elif any(k in lowered for k in ["financial", "bank", "credit card", "tax", "salary", "payroll", "revenue", "portfolio", "invoice", "wire transfer"]):
+                decision = "FINANCIAL"
+                reasoning = "Query contains financial transactions, banking credentials, payroll, or tax details."
+            elif any(k in lowered for k in ["legal", "nda", "contract", "attorney", "lawsuit", "litigation", "clause", "non-disclosure", "settlement"]):
+                decision = "LEGAL"
+                reasoning = "Query involves legal contracts, non-disclosure agreements, litigation briefs, or attorney communications."
+            elif any(k in lowered for k in ["ssn", "passport", "social security", "home address", "date of birth", "personal phone", "private diary"]):
+                decision = "PERSONAL"
+                reasoning = "Query contains personally identifiable information (PII) or sensitive personal life details."
+            elif any(k in lowered for k in ["confidential", "proprietary", "internal secret", "api key", "trade secret", "unreleased merger", "source code leak"]):
+                decision = "CONFIDENTIAL"
+                reasoning = "Query involves proprietary business secrets, internal confidential systems, or restricted assets."
+
+            if decision not in allowed_choices:
+                decision = allowed_choices[0]
+
+            return {
+                "decision": decision,
+                "confidence": 0.96,
+                "reasoning": f"[Strands Decider 2B Privacy Classifier]: {reasoning}",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"

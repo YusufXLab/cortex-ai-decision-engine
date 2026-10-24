@@ -10,11 +10,11 @@ from cortex.infrastructure.deciders.placeholders import (
     ContextDecider,
     CostStrategyDecider,
     ModelSelectionDecider,
-    PrivacyDecider,
     RiskDecider,
     ToolSelectionDecider,
     VisionRequirementDecider,
 )
+from cortex.infrastructure.deciders.privacy_decider import PrivacyDecider
 from cortex.infrastructure.deciders.registry import get_default_decision_modules
 
 __all__ = [
