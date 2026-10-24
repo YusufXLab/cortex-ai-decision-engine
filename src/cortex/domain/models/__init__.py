@@ -17,6 +17,7 @@ from cortex.domain.models.state import (
     TraceStep,
 )
 from cortex.domain.models.tool import ToolDecisionResult, ToolType
+from cortex.domain.models.vision import VisionDecisionResult, VisionRequirementType
 
 __all__ = [
     "AgentDecisionResult",
@@ -41,4 +42,6 @@ __all__ = [
     "ToolDecisionResult",
     "ToolType",
     "TraceStep",
+    "VisionDecisionResult",
+    "VisionRequirementType",
 ]

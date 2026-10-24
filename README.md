@@ -440,6 +440,57 @@ Examples of returned lists:
 
 ---
 
+## 👁️ Seventh AI Decision Module: VisionRequirementDecider (Strands Decider 2B)
+
+`VisionRequirementDecider` is the seventh production AI decision module in the pipeline. It runs immediately after `ContextSelectionDecider`.
+
+It answers **EXACTLY ONE** question:
+> *"What type of visual processing does this request require?"*
+
+### Critical Architectural Boundary
+- This module does **NOT** perform image understanding or analyze images.
+- It **ONLY** decides the required visual reasoning capability category.
+- It strictly preserves the Strands Decider 2B invariant: **Only make decisions; never generate completions**.
+
+### Why VisionRequirementDecider is Different from Tool Selection
+- **Tool Selection (Module 5)** determines *available system capabilities and I/O tools* (e.g. setting `["VISION", "FILE_READER"]` if the agent has image-viewing access).
+- **VisionRequirementDecider (Module 7)** determines *whether multimodal reasoning is actually necessary* and identifies the exact cognitive visual modality required.
+
+Even when `VISION` is enabled as an accessible tool:
+- If the user provides a text-only query with no visual assets, `VisionRequirementDecider` returns **`NONE`**, preventing unnecessary invocation of multimodal model pathways.
+- If visual assets are present, `VisionRequirementDecider` pinpoints the precise processing sub-modality (`OCR`, `IMAGE_UNDERSTANDING`, `DIAGRAM_ANALYSIS`, `UI_ANALYSIS`, or `MULTIMODAL`).
+
+### The 6 Allowed Vision Requirements
+
+| Vision Requirement | Description & Modality | Example Triggers |
+|---|---|---|
+| **`NONE`** | Zero visual reasoning required. Pure text processing. | Text queries, coding questions, essays, no attached imagery. |
+| **`OCR`** | Optical Character Recognition for tabular text, forms, receipts, or invoices. | Scanned receipts, restaurant bills, invoice scans, tabular forms. |
+| **`IMAGE_UNDERSTANDING`** | Natural scene, landscape, object, or photographic image inspection. | Scenic photos, artwork, product photos, real-world scenes. |
+| **`DIAGRAM_ANALYSIS`** | Technical architecture, network topology, flowcharts, schemas, UML. | AWS cloud architecture diagrams, UML class diagrams, database ERDs. |
+| **`UI_ANALYSIS`** | Software interfaces, app screenshots, wireframes, frontend layouts. | Web app screenshots, mobile mockups, UI bug inspection, button alignment. |
+| **`MULTIMODAL`** | Rich mixed documents containing interleaved text, charts, and images. | Multi-page PDF reports, research papers with graphs and figures. |
+
+### How This Decision Affects Model Routing & Downstream Execution
+The outcome of `VisionRequirementDecider` directly drives **Model Routing (Module 9)** and execution dispatch:
+
+1. **`NONE`**:
+   - Enables Model Routing to select fast, cost-effective text-only models (e.g. Anthropic Claude 3 Haiku, Amazon Titan Text, Meta Llama 3 8B).
+   - Eliminates image token preprocessing fees, saving up to 80% on compute costs and reducing TTFT (Time to First Token) by ~70%.
+
+2. **`OCR`**:
+   - Routes the asset to dedicated high-speed document extraction engines (such as Amazon Textract or specialized OCR microservices).
+   - Extracts structured textual tables and JSON before prompt synthesis, avoiding costly multi-megapixel vision tokenization in frontier models.
+
+3. **`DIAGRAM_ANALYSIS` & `UI_ANALYSIS`**:
+   - Directs Model Routing to high-resolution multimodal foundation models (such as Amazon Bedrock Claude 3.5 Sonnet).
+   - Tunes inference parameters for spatial bounding-box reasoning, component hierarchy resolution, and topological layout parsing.
+
+4. **`MULTIMODAL`**:
+   - Directs Model Routing to large-context multimodal engines equipped for multi-page document reasoning with interleaved charts, tables, and narrative paragraphs.
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

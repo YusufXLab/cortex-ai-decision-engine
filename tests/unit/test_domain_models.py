@@ -45,3 +45,45 @@ def test_generation_models() -> None:
         latency_ms=142.5,
     )
     assert res.latency_ms == 142.5
+
+
+def test_vision_domain_models() -> None:
+    """Validate VisionRequirementType enum and VisionDecisionResult model."""
+    from cortex.domain.models.vision import VisionDecisionResult, VisionRequirementType
+
+    assert len(VisionRequirementType) == 6
+    assert set(v.value for v in VisionRequirementType) == {
+        "NONE",
+        "OCR",
+        "IMAGE_UNDERSTANDING",
+        "DIAGRAM_ANALYSIS",
+        "UI_ANALYSIS",
+        "MULTIMODAL",
+    }
+
+    result = VisionDecisionResult(
+        vision_requirement=VisionRequirementType.DIAGRAM_ANALYSIS,
+        confidence=0.96,
+        reasoning="Architecture diagram requires topological analysis.",
+        latency_ms=15.4,
+    )
+    assert result.vision_requirement == VisionRequirementType.DIAGRAM_ANALYSIS
+    assert result.confidence == 0.96
+    assert result.latency_ms == 15.4
+
+    with pytest.raises(ValidationError):
+        VisionDecisionResult(
+            vision_requirement="INVALID_TYPE",  # type: ignore[arg-type]
+            confidence=0.9,
+            reasoning="Invalid",
+            latency_ms=10.0,
+        )
+
+    with pytest.raises(ValidationError):
+        VisionDecisionResult(
+            vision_requirement=VisionRequirementType.OCR,
+            confidence=1.2,  # > 1.0
+            reasoning="Too high",
+            latency_ms=10.0,
+        )
+

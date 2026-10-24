@@ -287,6 +287,45 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                 "reasoning": f"[Strands Decider 2B Context Selector]: Selected context sources {valid_sources} to optimize token window.",
             }
 
+        if task == "vision_requirement":
+            decision = "NONE"
+            reasoning = "No multimodal or image processing required for this text request."
+
+            # Check context/metadata and input
+            has_images = any(k in lowered for k in [
+                "image", "photo", "picture", "screenshot", "diagram", "receipt", "scan",
+                "ui", "wireframe", "chart", "multimodal", "pdf with charts"
+            ])
+
+            if has_images or "vision" in lowered:
+                if any(k in lowered for k in ["ocr", "receipt", "invoice", "scanned text", "scanned document", "extract text from receipt"]):
+                    decision = "OCR"
+                    reasoning = "Optical Character Recognition required to extract structured text from image or scanned receipt."
+                elif any(k in lowered for k in ["screenshot", "ui", "interface", "app screen", "software screenshot", "wireframe", "button"]):
+                    decision = "UI_ANALYSIS"
+                    reasoning = "UI analysis required to parse interface layout, components, and software visual elements."
+                elif any(k in lowered for k in ["diagram", "architecture diagram", "flowchart", "uml", "topology", "schema diagram"]):
+                    decision = "DIAGRAM_ANALYSIS"
+                    reasoning = "Diagram analysis required to interpret nodes, connectors, flow, and structural topology."
+                elif any(k in lowered for k in ["pdf containing text, charts and images", "multimodal", "mixed media", "charts and images", "rich document"]):
+                    decision = "MULTIMODAL"
+                    reasoning = "Comprehensive multimodal analysis required for document containing mixed text, charts, and imagery."
+                elif any(k in lowered for k in ["photo", "scene", "picture", "photo description", "what is in this photo", "describe the scene"]):
+                    decision = "IMAGE_UNDERSTANDING"
+                    reasoning = "Natural scene understanding required to describe photographic imagery."
+                else:
+                    decision = "IMAGE_UNDERSTANDING"
+                    reasoning = "General image understanding required for visual content."
+
+            if decision not in allowed_choices:
+                decision = allowed_choices[0]
+
+            return {
+                "decision": decision,
+                "confidence": 0.97,
+                "reasoning": f"[Strands Decider 2B Vision Evaluator]: {reasoning}",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"

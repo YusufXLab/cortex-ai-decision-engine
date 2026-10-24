@@ -25,6 +25,7 @@ def test_cortex_state_initialization() -> None:
     assert state.risk_level is None
     assert state.selected_tools == []
     assert state.selected_context == []
+    assert state.vision_requirement is None
     assert state.vision_required is False
     assert state.complexity is None
     assert state.selected_model is None

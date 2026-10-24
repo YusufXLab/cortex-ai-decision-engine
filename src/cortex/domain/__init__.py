@@ -23,6 +23,8 @@ from cortex.domain.models import (
     ToolDecisionResult,
     ToolType,
     TraceStep,
+    VisionDecisionResult,
+    VisionRequirementType,
 )
 from cortex.domain.protocols import (
     BedrockClientProtocol,
@@ -60,4 +62,6 @@ __all__ = [
     "ToolDecisionResult",
     "ToolType",
     "TraceStep",
+    "VisionDecisionResult",
+    "VisionRequirementType",
 ]

@@ -11,6 +11,7 @@ from cortex.domain.models.state import (
     PipelineStatus,
     PrivacyLevel,
     RiskLevel,
+    VisionRequirementType,
 )
 from cortex.infrastructure.bedrock.client import MockBedrockClient
 from cortex.infrastructure.deciders.base import BaseDecisionModule
@@ -45,6 +46,7 @@ async def test_orchestrator_successful_execution_with_all_11_modules() -> None:
     assert state.risk_level == RiskLevel.LOW
     assert isinstance(state.selected_tools, list)
     assert isinstance(state.selected_context, list)
+    assert state.vision_requirement == VisionRequirementType.NONE
     assert state.vision_required is False
     assert state.complexity == ComplexityLevel.MODERATE
     assert "claude" in state.selected_model.lower()

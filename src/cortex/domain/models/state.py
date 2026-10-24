@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Any
 import uuid
 from pydantic import BaseModel, Field
+from cortex.domain.models.vision import VisionRequirementType
 
 
 class PipelineStatus(str, Enum):
@@ -125,9 +126,13 @@ class CortexState(BaseModel):
         default_factory=list,
         description="6. Filtered and pruned context documents/memories.",
     )
+    vision_requirement: VisionRequirementType | None = Field(
+        default=None,
+        description="7. The specific type of visual processing required.",
+    )
     vision_required: bool = Field(
         default=False,
-        description="7. Whether multimodal / image analysis is required.",
+        description="7. Whether multimodal / image analysis is required (derived from vision_requirement).",
     )
     complexity: ComplexityLevel | None = Field(
         default=None,

@@ -13,12 +13,15 @@ from cortex.infrastructure.deciders.placeholders import (
     ConfidenceDecider,
     CostStrategyDecider,
     ModelSelectionDecider,
-    VisionRequirementDecider,
 )
 from cortex.infrastructure.deciders.privacy_decider import PrivacyDecider
 from cortex.infrastructure.deciders.registry import get_default_decision_modules
 from cortex.infrastructure.deciders.risk_decider import RiskDecider
 from cortex.infrastructure.deciders.tool_decider import ToolSelectionDecider
+from cortex.infrastructure.deciders.vision_decider import (
+    VisionDecider,
+    VisionRequirementDecider,
+)
 
 __all__ = [
     "AgentSelectionDecider",
@@ -34,6 +37,7 @@ __all__ = [
     "RiskDecider",
     "StrandsDeciderClient",
     "ToolSelectionDecider",
+    "VisionDecider",
     "VisionRequirementDecider",
     "get_default_decision_modules",
 ]
