@@ -356,6 +356,51 @@ Conversely, a request can be **PUBLIC** (Low Privacy) but **CRITICAL** Risk (e.g
 
 ---
 
+## 🛠️ Fifth AI Decision Module: ToolSelectionDecider (Strands Decider 2B)
+
+`ToolSelectionDecider` is the fifth production AI decision module in the pipeline. It runs immediately after `RiskDecider`.
+
+It answers **EXACTLY ONE** question:
+> *"What technical capabilities or external tools are required to fulfill this request?"*
+
+### Why Tool Selection is Different from Agent Selection
+- **Agent Selection (Module 2)** chooses **WHO** will solve the request (persona, cognitive framing, domain expert).
+- **Tool Selection (Module 5)** chooses **WHAT** capabilities, I/O interfaces, or tools are required to execute it.
+
+An agent is **NOT** a tool:
+- A `DevOpsAgent` might need `["DATABASE", "CODE_EXECUTION"]` to inspect a cluster database.
+- A `LiteratureReviewAgent` might need `["WEB_SEARCH", "FILE_READER", "RAG"]`.
+- A `FinancialAnalysisAgent` might need `["FILE_READER", "CALCULATOR"]`.
+- A conversational task might need `["NONE"]`.
+
+### The 9 Allowed Tools (Supports Multi-Tool Selection)
+Strands Decider 2B returns a **list of tools** (`list[ToolType]`):
+1. `NONE`: Pure language reasoning, conversational synthesis, or static deduction. Zero tools needed.
+2. `WEB_SEARCH`: Accessing live internet information, current market prices, or real-time news.
+3. `CALCULATOR`: Performing exact arithmetic, formula evaluations, variance computations, or financial math.
+4. `FILE_READER`: Parsing uploaded documents, PDFs, CSV spreadsheets, or text files.
+5. `VISION`: Interpreting visual diagrams, OCR scans, UI screenshots, or images.
+6. `DATABASE`: Querying SQL databases, executing relational queries, or accessing persistent records.
+7. `CODE_EXECUTION`: Running Python scripts or running commands in an isolated execution sandbox.
+8. `MEMORY`: Recalling cross-session historical context, past discussions, or user preferences.
+9. `RAG`: Retrieving semantic embeddings and text chunks from private vector databases.
+
+Examples of returned lists:
+- `["WEB_SEARCH"]`
+- `["FILE_READER", "WEB_SEARCH"]`
+- `["VISION", "FILE_READER"]`
+- `["NONE"]`
+
+### Downstream Architectural Impact of `selected_tools`
+The list of tools stored on `CortexState.selected_tools` drives later decision modules:
+1. **Context Decider (Module 6)**: Ingests documents if `FILE_READER` or `RAG` is active; fetches conversation history if `MEMORY` is active.
+2. **Vision Requirement Decider (Module 7)**: Automatically confirms visual pipeline activation if `VISION` is in `selected_tools`.
+3. **Complexity Decider (Module 8)**: Multi-tool pipelines elevate the task complexity tier from `SIMPLE` to `MODERATE` or `COMPLEX`.
+4. **Model Selection Decider (Module 9)**: Ensures the chosen Bedrock model natively supports Function Calling / Tool Use API (e.g. Claude 3.5 Sonnet Tool Use).
+5. **Execution Optimization**: Prevents spinning up sandboxes or allocating external I/O when `["NONE"]` is selected.
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

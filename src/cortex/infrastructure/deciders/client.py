@@ -228,6 +228,38 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                 "reasoning": f"[Strands Decider 2B Risk Evaluator]: {reasoning}",
             }
 
+        if task == "tool_selection":
+            selected_tools: list[str] = []
+
+            if any(k in lowered for k in ["search", "google", "web", "latest", "recent news", "current price", "today"]):
+                selected_tools.append("WEB_SEARCH")
+            if any(k in lowered for k in ["calculate", "math", "sum", "formula", "arithmetic", "variance", "percentage"]):
+                selected_tools.append("CALCULATOR")
+            if any(k in lowered for k in ["file", "pdf", "csv", "read doc", "document scan", "upload"]):
+                selected_tools.append("FILE_READER")
+            if any(k in lowered for k in ["image", "diagram", "screenshot", "chart", "ocr", "photo"]):
+                selected_tools.append("VISION")
+            if any(k in lowered for k in ["database", "sql", "query table", "postgres", "records"]):
+                selected_tools.append("DATABASE")
+            if any(k in lowered for k in ["execute", "run code", "sandbox", "python script", "run"]):
+                selected_tools.append("CODE_EXECUTION")
+            if any(k in lowered for k in ["remember", "past conversation", "my preference", "recall"]):
+                selected_tools.append("MEMORY")
+            if any(k in lowered for k in ["internal doc", "knowledge base", "rag", "embeddings"]):
+                selected_tools.append("RAG")
+
+            if not selected_tools:
+                selected_tools = ["NONE"]
+
+            # Filter by allowed choices if provided
+            valid_tools = [t for t in selected_tools if t in allowed_choices] or ["NONE"]
+
+            return {
+                "decision": valid_tools,
+                "confidence": 0.95,
+                "reasoning": f"[Strands Decider 2B Tool Selector]: Selected capabilities {valid_tools} to fulfill task requirements.",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"

@@ -18,6 +18,8 @@ from cortex.domain.models import (
     PrivacyLevel,
     RiskDecisionResult,
     RiskLevel,
+    ToolDecisionResult,
+    ToolType,
     TraceStep,
 )
 from cortex.domain.protocols import (
@@ -51,5 +53,7 @@ __all__ = [
     "RiskDecisionResult",
     "RiskLevel",
     "StrandsDeciderClientProtocol",
+    "ToolDecisionResult",
+    "ToolType",
     "TraceStep",
 ]

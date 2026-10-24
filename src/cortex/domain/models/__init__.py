@@ -15,6 +15,7 @@ from cortex.domain.models.state import (
     RiskLevel,
     TraceStep,
 )
+from cortex.domain.models.tool import ToolDecisionResult, ToolType
 
 __all__ = [
     "AgentDecisionResult",
@@ -34,5 +35,7 @@ __all__ = [
     "PrivacyLevel",
     "RiskDecisionResult",
     "RiskLevel",
+    "ToolDecisionResult",
+    "ToolType",
     "TraceStep",
 ]
