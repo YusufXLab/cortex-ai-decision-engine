@@ -2,10 +2,10 @@
 
 from cortex.domain.protocols.decider import DecisionModuleProtocol
 from cortex.infrastructure.deciders.agent_decider import AgentSelectionDecider
+from cortex.infrastructure.deciders.complexity_decider import ComplexityDecider
 from cortex.infrastructure.deciders.context_decider import ContextSelectionDecider
 from cortex.infrastructure.deciders.intent_decider import IntentDecider
 from cortex.infrastructure.deciders.placeholders import (
-    ComplexityDecider,
     ConfidenceDecider,
     CostStrategyDecider,
     ModelSelectionDecider,
@@ -21,9 +21,9 @@ def get_default_decision_modules(
 ) -> list[DecisionModuleProtocol]:
     """Returns the complete, ordered pipeline of the 11 decision modules.
 
-    Modules 1-7 (IntentDecider, AgentSelectionDecider, PrivacyDecider, RiskDecider, ToolSelectionDecider, ContextSelectionDecider, VisionRequirementDecider)
+    Modules 1-8 (IntentDecider, AgentSelectionDecider, PrivacyDecider, RiskDecider, ToolSelectionDecider, ContextSelectionDecider, VisionRequirementDecider, ComplexityDecider)
     are production AI-powered modules backed by Strands Decider 2B.
-    Modules 8-11 are placeholders ready for implementation.
+    Modules 9-11 are placeholders ready for implementation.
     """
     modules: list[DecisionModuleProtocol] = [
         IntentDecider(),

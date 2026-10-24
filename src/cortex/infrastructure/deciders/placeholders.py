@@ -221,31 +221,9 @@ class VisionRequirementDecider(BaseDecisionModule):
 
 
 # ==============================================================================
-# 8. Complexity Decider
+# 8. Complexity Decider (Implemented in complexity_decider.py)
 # ==============================================================================
-class ComplexityDecider(BaseDecisionModule):
-    """Assesses problem complexity to pick the right compute tier."""
-
-    def __init__(self) -> None:
-        super().__init__(
-            module_id="decider_08_complexity",
-            name="Complexity Decider",
-            decision_type=DecisionType.COMPLEXITY,
-            order=8,
-        )
-
-    async def _compute_decision(self, state: CortexState) -> DecisionOutcome:
-        # Placeholder: assesses reasoning depth with Strands Decider 2B
-        return DecisionOutcome(
-            module_id=self.module_id,
-            decision_type=self.decision_type,
-            action=ComplexityLevel.MODERATE.value,
-            confidence=0.91,
-            reasoning="Standard query complexity requires moderate reasoning.",
-        )
-
-    def apply_to_state(self, state: CortexState, outcome: DecisionOutcome) -> None:
-        state.complexity = ComplexityLevel(outcome.action)
+from cortex.infrastructure.deciders.complexity_decider import ComplexityDecider
 
 
 # ==============================================================================

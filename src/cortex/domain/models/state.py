@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Any
 import uuid
 from pydantic import BaseModel, Field
+from cortex.domain.models.complexity import ComplexityLevel
 from cortex.domain.models.vision import VisionRequirementType
 
 
@@ -44,13 +45,7 @@ class RiskLevel(str, Enum):
     CRITICAL = "CRITICAL"
 
 
-class ComplexityLevel(str, Enum):
-    """Task complexity determined by the Complexity Decider."""
 
-    SIMPLE = "simple"
-    MODERATE = "moderate"
-    COMPLEX = "complex"
-    EXPERT = "expert"
 
 
 class CostStrategy(str, Enum):
@@ -134,9 +129,13 @@ class CortexState(BaseModel):
         default=False,
         description="7. Whether multimodal / image analysis is required (derived from vision_requirement).",
     )
-    complexity: ComplexityLevel | None = Field(
+    complexity_level: ComplexityLevel | None = Field(
         default=None,
         description="8. Assessed task complexity tier.",
+    )
+    complexity: ComplexityLevel | None = Field(
+        default=None,
+        description="8. Assessed task complexity tier (alias for complexity_level).",
     )
     selected_model: str | None = Field(
         default=None,

@@ -491,6 +491,68 @@ The outcome of `VisionRequirementDecider` directly drives **Model Routing (Modul
 
 ---
 
+## ⚡ Eighth AI Decision Module: ComplexityDecider (Strands Decider 2B)
+
+`ComplexityDecider` is the eighth production AI decision module in the pipeline. It runs immediately after `VisionRequirementDecider`.
+
+It answers **EXACTLY ONE** question:
+> *"How computationally and cognitively complex is this request?"*
+
+### Critical Architectural Boundary
+- This module estimates **workload and reasoning depth**.
+- It does **NOT** select the AI foundation model (that belongs to Model Routing in Module 9).
+- It does **NOT** evaluate privacy or safety risk (those belong to Modules 3 and 4).
+- It strictly preserves the Strands Decider 2B invariant: **Only make decisions; never generate completions**.
+
+### Why Complexity is Different from Tool Selection and Model Routing
+1. **Tool Selection (Module 5)** determines *which external capabilities or I/O tools are needed* (`["WEB_SEARCH", "CALCULATOR"]`).
+2. **ComplexityDecider (Module 8)** estimates *computational workload, chain length, and cognitive effort* (`TRIVIAL`, `SIMPLE`, `COMPLEX`, `EXPERT`).
+3. **Model Routing (Module 9)** determines *which Amazon Bedrock model is appropriate* by combining Complexity with Privacy, Risk, Tools, and Cost Strategy.
+
+Decoupling Complexity from Model Routing is essential:
+- A task might require zero tools (`["NONE"]`) but be cognitively **`EXPERT`** (e.g., formal mathematical verification or Byzantine Fault Tolerance proof).
+- A task might invoke a tool (`CALCULATOR` for "2 + 2") yet be **`TRIVIAL`**.
+- Isolating Complexity ensures that when new Bedrock models (e.g., Claude 3.7 Sonnet, Llama 3.3) are introduced, only Model Routing needs configuration updates—the workload classification remains completely invariant.
+
+### The 4 Allowed Complexity Levels
+
+| Complexity Level | Cognitive Workload & Reasoning Chain | Example Triggers |
+|---|---|---|
+| **`TRIVIAL`** | Elementary arithmetic, single factual recall, or casual conversational greeting. | *"What is 2 + 2?"*, *"Hello, good morning!"*, *"What is the capital of France?"* |
+| **`SIMPLE`** | Single-turn generation, concise code snippets, standard email drafting, brief explanations. | *"Write a thank you email to my mentor"*, *"Write a function to reverse a string in Python"*, *"Explain what an API is"* |
+| **`COMPLEX`** | Multi-step reasoning, multiple tool coordination, file analysis, web search with synthesis. | *"Search the web for Bedrock models and summarize pricing"*, *"Analyze this uploaded balance sheet PDF"*, *"Troubleshoot deadlock in async worker pool"* |
+| **`EXPERT`** | Large multi-document workflows, heavy orchestration, multiple context sources, long reasoning chains, mixed multimodal synthesis. | *"Synthesize 5 research papers on distributed consensus and prove safety invariants"*, *"Analyze 50-page annual report PDF containing text, charts and images"*, *"Architecture redesign across 12 microservices"* |
+
+### Influence on Latency, Token Budget, Compute Allocation & Downstream Routing
+
+The complexity tier assigned to `CortexState.complexity_level` directly orchestrates system resource allocation:
+
+1. **`TRIVIAL`**:
+   - **Token Budget**: Minimized to `< 256 tokens`.
+   - **Latency Profile**: Target TTFT `< 200ms`.
+   - **Compute Allocation**: Zero chain-of-thought; direct single-pass generation.
+   - **Downstream Routing**: Routes to ultra-fast, low-cost models (e.g. Anthropic Claude 3 Haiku, Amazon Titan Text Lite).
+
+2. **`SIMPLE`**:
+   - **Token Budget**: Standard `< 1,024 tokens`.
+   - **Latency Profile**: Target response time `< 1.0s`.
+   - **Compute Allocation**: Direct generation without step decomposition.
+   - **Downstream Routing**: Balanced compute models (e.g. Claude 3 Haiku or balanced Bedrock models).
+
+3. **`COMPLEX`**:
+   - **Token Budget**: High `2,048 - 4,096 tokens`.
+   - **Latency Profile**: Up to `3.0 - 5.0s`.
+   - **Compute Allocation**: Activates multi-step reasoning, structured tool invocation protocols, and verification loops.
+   - **Downstream Routing**: Routes to high-reasoning foundation models (e.g. Amazon Bedrock Claude 3.5 Sonnet).
+
+4. **`EXPERT`**:
+   - **Token Budget**: Maximum `4,096 - 8,192+ tokens`.
+   - **Latency Profile**: Asynchronous long-running completion (`5.0s+`).
+   - **Compute Allocation**: Extended context processing, deep cross-modal reasoning, self-consistency checks.
+   - **Downstream Routing**: Routes exclusively to top-tier frontier foundation models (e.g. Claude 3.5 Sonnet / Opus).
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

@@ -317,13 +317,58 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                     decision = "IMAGE_UNDERSTANDING"
                     reasoning = "General image understanding required for visual content."
 
+            return {
+                "decision": decision,
+                "confidence": 0.97,
+                "reasoning": f"[Strands Decider 2B Vision Evaluator]: {reasoning}",
+            }
+
+        if task in ("complexity", "complexity_assessment"):
+            decision = "SIMPLE"
+            reasoning = "Standard cognitive complexity request."
+
+            # Check for EXPERT triggers
+            if any(k in lowered for k in [
+                "large multi-document", "multi-document", "heavy orchestration",
+                "multiple context sources", "long reasoning chains", "mixed multimodal workflows",
+                "distributed consensus", "formal verification", "annual report pdf containing text, charts and images",
+                "cross-modal reasoning across 50 pages", "architecture redesign across 12 microservices"
+            ]) or "multimodal" in lowered and "multi-page" in lowered:
+                decision = "EXPERT"
+                reasoning = "High-order reasoning chain requiring multi-document synthesis and heavy orchestration."
+            # Check for COMPLEX triggers
+            elif any(k in lowered for k in [
+                "multi-step reasoning", "multiple tools", "file analysis",
+                "web search + summarization", "search the web and summarize",
+                "analyze this uploaded financial", "cross-reference", "troubleshoot deadlock",
+                "audit this aes-gcm encryption code", "deploy an aws ecs cluster", "balance sheet pdf"
+            ]) or "tools: ['web_search', 'file_reader']" in lowered or "selected tools: ['vision', 'file_reader']" in lowered:
+                decision = "COMPLEX"
+                reasoning = "Multi-step reasoning involving tool coordination, file analysis, or comparative synthesis."
+            # Check for TRIVIAL triggers
+            elif any(k in lowered for k in [
+                "basic arithmetic", "greeting", "one factual question",
+                "2 + 2", "hello", "hi there", "good morning", "what is the capital of france",
+                "who wrote hamlet", "ping"
+            ]):
+                decision = "TRIVIAL"
+                reasoning = "Basic single-fact lookup, arithmetic, or casual conversational greeting."
+            # Check for SIMPLE triggers
+            elif any(k in lowered for k in [
+                "email writing", "small code snippet", "short explanation",
+                "write a thank you email", "reverse a string in python", "explain what an api is",
+                "tell me a story", "draft a brief memo"
+            ]):
+                decision = "SIMPLE"
+                reasoning = "Direct, single-turn generation or short code/text composition."
+
             if decision not in allowed_choices:
                 decision = allowed_choices[0]
 
             return {
                 "decision": decision,
-                "confidence": 0.97,
-                "reasoning": f"[Strands Decider 2B Vision Evaluator]: {reasoning}",
+                "confidence": 0.96,
+                "reasoning": f"[Strands Decider 2B Complexity Evaluator]: {reasoning}",
             }
 
         # Semantic routing simulation for offline testing

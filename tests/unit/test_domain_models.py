@@ -87,3 +87,44 @@ def test_vision_domain_models() -> None:
             latency_ms=10.0,
         )
 
+
+def test_complexity_domain_models() -> None:
+    """Validate ComplexityLevel enum and ComplexityDecisionResult model."""
+    from cortex.domain.models.complexity import ComplexityDecisionResult, ComplexityLevel
+
+    assert set(ComplexityLevel) >= {
+        ComplexityLevel.TRIVIAL,
+        ComplexityLevel.SIMPLE,
+        ComplexityLevel.COMPLEX,
+        ComplexityLevel.EXPERT,
+    }
+    assert ComplexityLevel("TRIVIAL") == ComplexityLevel.TRIVIAL
+    assert ComplexityLevel("simple") == ComplexityLevel.SIMPLE
+
+    result = ComplexityDecisionResult(
+        complexity_level=ComplexityLevel.COMPLEX,
+        confidence=0.97,
+        reasoning="Multi-tool query requiring data reconciliation.",
+        latency_ms=18.2,
+    )
+    assert result.complexity_level == ComplexityLevel.COMPLEX
+    assert result.confidence == 0.97
+    assert result.latency_ms == 18.2
+
+    with pytest.raises(ValidationError):
+        ComplexityDecisionResult(
+            complexity_level="IMPOSSIBLE",  # type: ignore[arg-type]
+            confidence=0.9,
+            reasoning="Invalid level",
+            latency_ms=12.0,
+        )
+
+    with pytest.raises(ValidationError):
+        ComplexityDecisionResult(
+            complexity_level=ComplexityLevel.SIMPLE,
+            confidence=-0.1,  # < 0.0
+            reasoning="Invalid",
+            latency_ms=12.0,
+        )
+
+

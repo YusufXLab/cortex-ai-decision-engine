@@ -8,8 +8,11 @@ from cortex.infrastructure.deciders.context_decider import (
     ContextSelectionDecider,
 )
 from cortex.infrastructure.deciders.intent_decider import IntentDecider
-from cortex.infrastructure.deciders.placeholders import (
+from cortex.infrastructure.deciders.complexity_decider import (
+    ComplexityAssessmentDecider,
     ComplexityDecider,
+)
+from cortex.infrastructure.deciders.placeholders import (
     ConfidenceDecider,
     CostStrategyDecider,
     ModelSelectionDecider,
@@ -26,6 +29,7 @@ from cortex.infrastructure.deciders.vision_decider import (
 __all__ = [
     "AgentSelectionDecider",
     "BaseDecisionModule",
+    "ComplexityAssessmentDecider",
     "ComplexityDecider",
     "ConfidenceDecider",
     "ContextDecider",

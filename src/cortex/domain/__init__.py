@@ -3,6 +3,7 @@
 from cortex.domain.models import (
     AgentDecisionResult,
     AgentProfile,
+    ComplexityDecisionResult,
     ComplexityLevel,
     ContextDecisionResult,
     ContextSourceType,
@@ -38,6 +39,7 @@ __all__ = [
     "AgentDecisionResult",
     "AgentProfile",
     "BedrockClientProtocol",
+    "ComplexityDecisionResult",
     "ComplexityLevel",
     "ContextDecisionResult",
     "ContextSourceType",
