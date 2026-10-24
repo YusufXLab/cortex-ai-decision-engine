@@ -1,0 +1,31 @@
+services:
+  cortex-engine:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: cortex-ai-decision-engine
+    restart: unless-stopped
+    ports:
+      - "${PORT:-8000}:8000"
+    environment:
+      - ENVIRONMENT=development
+      - DEBUG=true
+      - HOST=0.0.0.0
+      - PORT=8000
+      - LOG_LEVEL=INFO
+      - LOG_JSON_FORMAT=false
+      - STRANDS_DECIDER_MOCK_MODE=true
+      - BEDROCK_MOCK_MODE=true
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+    env_file:
+      - .env
+    volumes:
+      # Mount src for hot reloading during development
+      - ./src:/app/src:ro
+    command: ["uvicorn", "cortex.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/v1/health').read()"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
