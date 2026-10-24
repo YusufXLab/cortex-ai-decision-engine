@@ -1,5 +1,6 @@
 """Domain models export."""
 
+from cortex.domain.models.agent import AgentDecisionResult, AgentProfile
 from cortex.domain.models.decision import DecisionInput, DecisionOutcome, DecisionType
 from cortex.domain.models.generation import GenerationInput, GenerationOutcome
 from cortex.domain.models.intent import IntentCategory, IntentDecisionResult
@@ -14,6 +15,8 @@ from cortex.domain.models.state import (
 )
 
 __all__ = [
+    "AgentDecisionResult",
+    "AgentProfile",
     "ComplexityLevel",
     "CortexState",
     "CostStrategy",

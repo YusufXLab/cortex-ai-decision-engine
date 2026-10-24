@@ -1,10 +1,10 @@
 """Strands Decider 2B decision modules export."""
 
+from cortex.infrastructure.deciders.agent_decider import AgentSelectionDecider
 from cortex.infrastructure.deciders.base import BaseDecisionModule
 from cortex.infrastructure.deciders.client import StrandsDeciderClient
 from cortex.infrastructure.deciders.intent_decider import IntentDecider
 from cortex.infrastructure.deciders.placeholders import (
-    AgentSelectionDecider,
     ComplexityDecider,
     ConfidenceDecider,
     ContextDecider,

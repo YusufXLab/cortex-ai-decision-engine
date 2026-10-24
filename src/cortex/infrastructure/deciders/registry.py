@@ -1,9 +1,9 @@
 """Factory registry providing the ordered list of 11 Strands Decider 2B modules."""
 
 from cortex.domain.protocols.decider import DecisionModuleProtocol
+from cortex.infrastructure.deciders.agent_decider import AgentSelectionDecider
 from cortex.infrastructure.deciders.intent_decider import IntentDecider
 from cortex.infrastructure.deciders.placeholders import (
-    AgentSelectionDecider,
     ComplexityDecider,
     ConfidenceDecider,
     ContextDecider,
@@ -21,8 +21,9 @@ def get_default_decision_modules(
 ) -> list[DecisionModuleProtocol]:
     """Returns the complete, ordered pipeline of the 11 decision modules.
 
-    Module 1 (IntentDecider) is the production AI-powered module backed by Strands Decider 2B.
-    Modules 2-11 are placeholders ready for implementation.
+    Modules 1 & 2 (IntentDecider, AgentSelectionDecider) are production AI-powered modules
+    backed by Strands Decider 2B.
+    Modules 3-11 are placeholders ready for implementation.
     """
     modules: list[DecisionModuleProtocol] = [
         IntentDecider(),

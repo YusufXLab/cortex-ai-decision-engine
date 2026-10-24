@@ -134,6 +134,48 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
         """Realistic simulated model decision for offline development."""
         lowered = user_input.lower()
 
+        if task == "agent_selection":
+            # Semantic agent selection simulation
+            selected = allowed_choices[0]
+            reasoning = "Best matching specialized agent for request parameters."
+
+            if any(k in lowered for k in ["deploy", "ecs", "docker", "cluster", "kubernetes", "pipeline"]) and "DevOpsAgent" in allowed_choices:
+                selected = "DevOpsAgent"
+                reasoning = "Request demands cloud deployment, container orchestration, and infrastructure engineering."
+            elif any(k in lowered for k in ["bug", "fix", "crash", "error", "trace"]) and "DebuggingAgent" in allowed_choices:
+                selected = "DebuggingAgent"
+                reasoning = "Request requires diagnostic root cause analysis and software defect resolution."
+            elif any(k in lowered for k in ["refactor", "restructure", "clean"]) and "RefactoringAgent" in allowed_choices:
+                selected = "RefactoringAgent"
+                reasoning = "Request asks for code reorganization and technical debt reduction without altering behavior."
+            elif any(k in lowered for k in ["review", "audit", "security"]) and "CodeReviewAgent" in allowed_choices:
+                selected = "CodeReviewAgent"
+                reasoning = "Auditing code quality, security vulnerabilities, and adherence to guidelines."
+            elif any(k in lowered for k in ["risk", "migration", "threat"]) and "RiskAnalysisAgent" in allowed_choices:
+                selected = "RiskAnalysisAgent"
+                reasoning = "Request involves migration risk modeling, failure modes, and security assessment."
+            elif any(k in lowered for k in ["finance", "cost", "budget", "dollar", "unit economic"]) and "FinancialAnalysisAgent" in allowed_choices:
+                selected = "FinancialAnalysisAgent"
+                reasoning = "Quantitative financial modeling, cloud economics, or ROI analysis requested."
+            elif any(k in lowered for k in ["diagram", "uml", "flowchart", "architecture chart"]) and "DiagramAnalysisAgent" in allowed_choices:
+                selected = "DiagramAnalysisAgent"
+                reasoning = "Parsing and interpreting visual system architecture schemas or UML diagrams."
+            elif any(k in lowered for k in ["ocr", "receipt", "table", "document scan"]) and "OCRAgent" in allowed_choices:
+                selected = "OCRAgent"
+                reasoning = "Extracting tabular data and characters from scanned document imagery."
+            elif any(k in lowered for k in ["api", "doc", "guide", "tutorial"]) and "TechnicalWriterAgent" in allowed_choices:
+                selected = "TechnicalWriterAgent"
+                reasoning = "Drafting comprehensive API technical documentation or engineering guide."
+            elif any(k in lowered for k in ["paper", "academic", "literature", "citation"]) and "LiteratureReviewAgent" in allowed_choices:
+                selected = "LiteratureReviewAgent"
+                reasoning = "Synthesizing scholarly publications and academic citations."
+
+            return {
+                "decision": selected,
+                "confidence": 0.95,
+                "reasoning": f"[Strands Decider 2B Agent Selector]: {reasoning}",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"

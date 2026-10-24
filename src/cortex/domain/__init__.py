@@ -1,6 +1,8 @@
 """Domain layer: pure business entities, value objects, and protocols."""
 
 from cortex.domain.models import (
+    AgentDecisionResult,
+    AgentProfile,
     ComplexityLevel,
     CortexState,
     CostStrategy,
@@ -21,9 +23,12 @@ from cortex.domain.protocols import (
     DeciderProtocol,
     DecisionModuleProtocol,
     OrchestratorProtocol,
+    StrandsDeciderClientProtocol,
 )
 
 __all__ = [
+    "AgentDecisionResult",
+    "AgentProfile",
     "BedrockClientProtocol",
     "ComplexityLevel",
     "CortexState",
@@ -41,5 +46,6 @@ __all__ = [
     "PipelineStatus",
     "PrivacyLevel",
     "RiskLevel",
+    "StrandsDeciderClientProtocol",
     "TraceStep",
 ]

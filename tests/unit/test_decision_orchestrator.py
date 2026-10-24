@@ -40,7 +40,7 @@ async def test_orchestrator_successful_execution_with_all_11_modules() -> None:
 
     # Verify all 11 decisions were properly populated on CortexState
     assert state.intent in {"CODING", "GENERAL_QUERY"}
-    assert state.selected_agent == "general_assistant_agent"
+    assert state.selected_agent in {"DevOpsAgent", "general_assistant_agent"}
     assert state.privacy_level == PrivacyLevel.PUBLIC
     assert state.risk_level == RiskLevel.LOW
     assert isinstance(state.selected_tools, list)

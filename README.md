@@ -241,6 +241,61 @@ To implement any of the remaining 10 decision modules (e.g. `PrivacyDecider`, `R
 
 ---
 
+## 🤖 Second AI Decision Module: AgentSelectionDecider (Strands Decider 2B)
+
+`AgentSelectionDecider` is the second production AI decision module in the pipeline. It answers a fundamentally different architectural question from Intent Classification:
+
+| Decision Step | Core Question Answered | Example Decisions |
+|---|---|---|
+| **Step 1: IntentDecider** | *"What is the user trying to do at a high level?"* | `CODING`, `RESEARCH`, `WRITING`, `ANALYSIS` |
+| **Step 2: AgentSelectionDecider** | *"Which specialized internal agent is best suited to solve this specific request?"* | `DevOpsAgent`, `DebuggingAgent`, `RefactoringAgent` |
+
+### Why Agent Selection is a Separate AI Decision from Intent Classification
+A simplistic 1-to-1 mapping between Intent and Agent renders a multi-agent system redundant. Under the **SAME** intent (e.g. `CODING`), different technical tasks require completely different tools, domain context, and agent personas:
+- **`Intent = CODING`**:
+  - *"Why is my async task hanging with deadlock?"* $\rightarrow$ **`DebuggingAgent`** (root cause analysis, stack traces)
+  - *"Deploy this FastAPI container to AWS ECS Fargate with Terraform."* $\rightarrow$ **`DevOpsAgent`** (cloud architecture, Docker, CI/CD)
+  - *"Refactor this 600-line class to follow Single Responsibility."* $\rightarrow$ **`RefactoringAgent`** (code restructuring, modularity)
+  - *"Audit this AES-GCM encryption code for security vulnerabilities."* $\rightarrow$ **`CodeReviewAgent`** (security auditing, quality gates)
+  - *"Implement an AVL balanced binary tree in Python."* $\rightarrow$ **`SoftwareEngineerAgent`** (algorithm implementation)
+- **`Intent = RESEARCH`**:
+  - Academic papers and citations $\rightarrow$ **`LiteratureReviewAgent`**
+  - Real-time internet facts & market data $\rightarrow$ **`WebResearchAgent`**
+  - Claim validation & source checking $\rightarrow$ **`FactCheckingAgent`**
+  - Hardware & RFC protocol whitepapers $\rightarrow$ **`TechnicalResearchAgent`**
+- **`Intent = WRITING`**:
+  - Executive & client correspondence $\rightarrow$ **`EmailWriterAgent`**
+  - API documentation & developer guides $\rightarrow$ **`TechnicalWriterAgent`**
+  - Landing page copy & announcements $\rightarrow$ **`MarketingCopyAgent`**
+- **`Intent = ANALYSIS`**:
+  - Threat modeling & migration risk $\rightarrow$ **`RiskAnalysisAgent`**
+  - Unit economics, cloud ROI & valuation $\rightarrow$ **`FinancialAnalysisAgent`**
+  - Statistical datasets & numerical trends $\rightarrow$ **`DataAnalysisAgent`**
+- **`Intent = VISION`**:
+  - Scanned text, receipts, and table extraction $\rightarrow$ **`OCRAgent`**
+  - System architecture schemas & UML flowcharts $\rightarrow$ **`DiagramAnalysisAgent`**
+
+### Dynamic Extensibility via `AgentRegistry`
+To add a new specialized agent without modifying the orchestrator or `AgentSelectionDecider`:
+```python
+from cortex.application.agents.registry import get_default_agent_registry
+from cortex.domain.models.agent import AgentProfile
+from cortex.domain.models.intent import IntentCategory
+
+registry = get_default_agent_registry()
+registry.register(
+    AgentProfile(
+        name="QuantumCryptographyAgent",
+        intents=[IntentCategory.CODING, IntentCategory.RESEARCH],
+        description="Specialized in post-quantum lattice cryptography and Shor's algorithm.",
+        capabilities=["post_quantum_crypto", "qiskit", "lattice_algorithms"],
+    )
+)
+```
+Strands Decider 2B dynamically considers the newly registered agent profile when evaluating requests matching those intents!
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:
