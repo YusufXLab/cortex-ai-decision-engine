@@ -205,6 +205,29 @@ class StrandsDeciderClient(StrandsDeciderClientProtocol):
                 "reasoning": f"[Strands Decider 2B Privacy Classifier]: {reasoning}",
             }
 
+        if task == "risk_assessment":
+            decision = "LOW"
+            reasoning = "Benign informational query with minimal operational risk."
+
+            if any(k in lowered for k in ["ignore all rules", "jailbreak", "exploit", "ddos", "malware", "bypass security", "exfiltrate"]):
+                decision = "CRITICAL"
+                reasoning = "Detected high-threat malicious prompt injection, exploit payload, or severe safety violation."
+            elif any(k in lowered for k in ["delete database", "drop table", "override prod", "rm -rf", "wipe disk", "kill process"]):
+                decision = "HIGH"
+                reasoning = "Destructive data mutation or destructive operational action requiring manual verification."
+            elif any(k in lowered for k in ["deploy", "modify config", "alter table", "migration", "batch update", "schema change"]):
+                decision = "MODERATE"
+                reasoning = "Operational state change or deployment requiring step-level verification."
+
+            if decision not in allowed_choices:
+                decision = allowed_choices[0]
+
+            return {
+                "decision": decision,
+                "confidence": 0.96,
+                "reasoning": f"[Strands Decider 2B Risk Evaluator]: {reasoning}",
+            }
+
         # Semantic routing simulation for offline testing
         if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
             decision = "CODING"

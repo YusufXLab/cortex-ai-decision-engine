@@ -31,7 +31,7 @@ async def test_demo_endpoint_pipeline_execution(async_client: AsyncClient) -> No
     assert data["intent"] in {"ANALYSIS", "GENERAL_QUERY"}
     assert data["selected_agent"] in {"RiskAnalysisAgent", "general_assistant_agent"}
     assert data["privacy_level"] in {"PUBLIC", "public"}
-    assert data["risk_level"] == "low"
+    assert data["risk_level"] in {"LOW", "low"}
     assert data["complexity"] == "moderate"
     assert "claude" in data["selected_model"].lower()
     assert data["cost_strategy"] == "balanced"

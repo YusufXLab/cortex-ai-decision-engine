@@ -16,6 +16,7 @@ from cortex.domain.models import (
     PipelineStatus,
     PrivacyDecisionResult,
     PrivacyLevel,
+    RiskDecisionResult,
     RiskLevel,
     TraceStep,
 )
@@ -47,6 +48,7 @@ __all__ = [
     "PipelineStatus",
     "PrivacyDecisionResult",
     "PrivacyLevel",
+    "RiskDecisionResult",
     "RiskLevel",
     "StrandsDeciderClientProtocol",
     "TraceStep",

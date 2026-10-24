@@ -331,6 +331,31 @@ The `PrivacyLevel` output stored on `CortexState` actively drives downstream dec
 
 ---
 
+## 🛡️ Fourth AI Decision Module: RiskDecider (Strands Decider 2B)
+
+`RiskDecider` is the fourth production AI decision module in the pipeline. It runs immediately after `PrivacyDecider`.
+
+It answers **EXACTLY ONE** question:
+> *"How risky is this request to system stability, operational integrity, and safety if the system proceeds?"*
+
+### Why Risk is a Separate Decision from Privacy
+- **PrivacyDecider** classifies *data sensitivity and confidentiality requirements*.
+- **RiskDecider** classifies *operational risk, destructive side effects, prompt injections, and safety violations*.
+
+A request can be **MEDICAL / FINANCIAL** (High Privacy) but **LOW** Risk (e.g. asking for clinical definitions of test results), meaning it should proceed under strict confidentiality.
+Conversely, a request can be **PUBLIC** (Low Privacy) but **CRITICAL** Risk (e.g. generating a denial-of-service script against a public IP), meaning it must be **BLOCKED immediately**.
+
+### The 4 Allowed Risk Levels & Downstream Pipeline Impact
+
+| Risk Level | Operational Meaning | Downstream Pipeline Impact |
+|---|---|---|
+| **`LOW`** | Benign informational, creative, educational, or read-only queries with zero operational hazard. | **Continue normally** through standard decision routing and baseline compute. |
+| **`MODERATE`** | Reversible operational modifications, infrastructure changes, schema migrations, or batch updates. | **Enable step verification**; triggers parameter validation in ToolSelectionDecider (Module 5). |
+| **`HIGH`** | Potentially destructive data mutations (e.g. database drop, bulk file deletion, production config overrides). | **Require stronger model reasoning** in ModelSelectionDecider (Module 9), and **disable automatic tool execution** (dry-run only). |
+| **`CRITICAL`** | Malicious prompt injection / jailbreaks, exploit payloads, automated exfiltration, or safety violations. | **Immediate pipeline termination** by DecisionOrchestrator. Halts execution, marks state `BLOCKED`, and skips Amazon Bedrock. |
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

@@ -5,6 +5,7 @@ from cortex.domain.models.decision import DecisionInput, DecisionOutcome, Decisi
 from cortex.domain.models.generation import GenerationInput, GenerationOutcome
 from cortex.domain.models.intent import IntentCategory, IntentDecisionResult
 from cortex.domain.models.privacy import PrivacyDecisionResult
+from cortex.domain.models.risk import RiskDecisionResult
 from cortex.domain.models.state import (
     ComplexityLevel,
     CortexState,
@@ -31,6 +32,7 @@ __all__ = [
     "PipelineStatus",
     "PrivacyDecisionResult",
     "PrivacyLevel",
+    "RiskDecisionResult",
     "RiskLevel",
     "TraceStep",
 ]

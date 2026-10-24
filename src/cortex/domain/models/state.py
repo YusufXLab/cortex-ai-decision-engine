@@ -35,12 +35,12 @@ class PrivacyLevel(str, Enum):
 
 
 class RiskLevel(str, Enum):
-    """Safety and security risk level determined by the Risk/Guardrail Decider."""
+    """Safety and operational risk level determined by RiskDecider."""
 
-    LOW = "low"
-    MEDIUM = "medium"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = "LOW"
+    MODERATE = "MODERATE"
+    HIGH = "HIGH"
+    CRITICAL = "CRITICAL"
 
 
 class ComplexityLevel(str, Enum):

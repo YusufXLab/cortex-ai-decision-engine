@@ -90,8 +90,8 @@ class DecisionOrchestrator:
                 return state
 
             # Step 3: Gating Checks after each decision
-            # 3a. Risk/Guardrail Gate
-            if state.risk_level in (RiskLevel.HIGH, RiskLevel.CRITICAL) or outcome.action == "REJECT":
+            # 3a. Risk/Guardrail Gate (Halt pipeline on CRITICAL risk or explicit REJECT)
+            if state.risk_level == RiskLevel.CRITICAL or outcome.action == "REJECT":
                 reason = f"Request blocked by {module.name}: action='{outcome.action}', risk='{state.risk_level}'"
                 logger.warning("Pipeline halted at step %d: %s", module.order, reason)
                 state.mark_blocked(reason=reason)
