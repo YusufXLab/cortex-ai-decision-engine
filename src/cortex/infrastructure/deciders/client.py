@@ -1,0 +1,167 @@
+"""Asynchronous HTTP client for invoking Strands Decider 2B.
+
+Strict Invariant:
+Strands Decider 2B is used strictly for low-latency decision-making,
+classification, and routing. It NEVER generates responses for the user.
+"""
+
+from typing import Any
+import httpx
+from cortex.core.config import Settings, get_settings
+from cortex.core.exceptions import (
+    DeciderInferenceError,
+    DeciderTimeoutError,
+)
+from cortex.core.logging import get_logger
+from cortex.domain.protocols.strands_client import StrandsDeciderClientProtocol
+
+logger = get_logger("cortex.deciders.client")
+
+
+class StrandsDeciderClient(StrandsDeciderClientProtocol):
+    """Production client for communicating with Strands Decider 2B model endpoints.
+
+    Supports both live HTTP inference (vLLM / Triton / Ollama / FastAPI daemon)
+    and offline mock simulation for development and testing.
+    """
+
+    def __init__(
+        self,
+        settings: Settings | None = None,
+        http_client: httpx.AsyncClient | None = None,
+    ) -> None:
+        self.settings = settings or get_settings()
+        self.endpoint = self.settings.strands.endpoint
+        self.timeout_seconds = self.settings.strands.timeout_seconds
+        self.model_name = self.settings.strands.model_name
+        self.mock_mode = self.settings.strands.mock_mode
+        self._http_client = http_client
+
+    async def _get_client(self) -> httpx.AsyncClient:
+        if self._http_client is not None:
+            return self._http_client
+        return httpx.AsyncClient(timeout=self.timeout_seconds)
+
+    async def decide(
+        self,
+        task: str,
+        user_input: str,
+        allowed_choices: list[str],
+        system_instruction: str,
+        parameters: dict[str, Any] | None = None,
+    ) -> dict[str, Any]:
+        """Sends a decision prompt to Strands Decider 2B.
+
+        Args:
+            task: Task classification identifier.
+            user_input: User text or context to evaluate.
+            allowed_choices: Strictly allowed output categories.
+            system_instruction: System prompt framing the decision criteria.
+            parameters: Optional inference parameters (e.g. temperature).
+
+        Returns:
+            Dict containing 'decision', 'confidence', and 'reasoning'.
+
+        Raises:
+            DeciderTimeoutError: On inference timeout.
+            DeciderInferenceError: On network failure, non-200 HTTP, or malformed response.
+        """
+        if self.mock_mode:
+            return await self._mock_decision(task, user_input, allowed_choices)
+
+        payload = {
+            "model": self.model_name,
+            "task": task,
+            "input": user_input,
+            "allowed_choices": allowed_choices,
+            "system_instruction": system_instruction,
+            "parameters": parameters or {"temperature": 0.0, "max_tokens": 150},
+        }
+
+        logger.debug(
+            "Invoking Strands Decider 2B at %s for task='%s'",
+            self.endpoint,
+            task,
+        )
+
+        should_close = self._http_client is None
+        client = await self._get_client()
+
+        try:
+            response = await client.post(
+                self.endpoint,
+                json=payload,
+                headers={"Content-Type": "application/json"},
+            )
+            response.raise_for_status()
+            data = response.json()
+
+            if not isinstance(data, dict) or "decision" not in data:
+                raise DeciderInferenceError(
+                    f"Strands Decider 2B returned malformed output structure: {data}"
+                )
+
+            return data
+
+        except httpx.TimeoutException as exc:
+            logger.error("Strands Decider 2B timed out after %.1fs: %s", self.timeout_seconds, exc)
+            raise DeciderTimeoutError(
+                f"Strands Decider 2B request timed out after {self.timeout_seconds}s"
+            ) from exc
+
+        except httpx.HTTPStatusError as exc:
+            logger.error("Strands Decider 2B returned HTTP %d: %s", exc.response.status_code, exc.response.text)
+            raise DeciderInferenceError(
+                f"Strands Decider 2B returned HTTP {exc.response.status_code}: {exc.response.text}"
+            ) from exc
+
+        except httpx.RequestError as exc:
+            logger.error("Failed to connect to Strands Decider 2B: %s", exc)
+            raise DeciderInferenceError(
+                f"Connection to Strands Decider 2B failed at {self.endpoint}: {exc}"
+            ) from exc
+
+        finally:
+            if should_close:
+                await client.aclose()
+
+    async def _mock_decision(
+        self,
+        task: str,
+        user_input: str,
+        allowed_choices: list[str],
+    ) -> dict[str, Any]:
+        """Realistic simulated model decision for offline development."""
+        lowered = user_input.lower()
+
+        # Semantic routing simulation for offline testing
+        if "code" in lowered or "python" in lowered or "function" in lowered or "bug" in lowered or "refactor" in lowered or "deploy" in lowered:
+            decision = "CODING"
+            reasoning = "Query requires software engineering, deployment, or code implementation."
+        elif "research" in lowered or "investigate" in lowered or "study" in lowered or "literature" in lowered:
+            decision = "RESEARCH"
+            reasoning = "In-depth factual inquiry requiring literature or web research."
+        elif "analyze" in lowered or "risk" in lowered or "compare" in lowered or "eval" in lowered or "metrics" in lowered:
+            decision = "ANALYSIS"
+            reasoning = "Analytical evaluation or risk assessment requested."
+        elif "write" in lowered or "draft" in lowered or "essay" in lowered or "story" in lowered or "email" in lowered:
+            decision = "WRITING"
+            reasoning = "Creative or professional document composition requested."
+        elif "plan" in lowered or "roadmap" in lowered or "schedule" in lowered or "steps" in lowered:
+            decision = "PLANNING"
+            reasoning = "Multi-step strategic planning and sequencing requested."
+        elif "image" in lowered or "picture" in lowered or "diagram" in lowered or "screenshot" in lowered:
+            decision = "VISION"
+            reasoning = "Visual inspection or multimodal comprehension required."
+        else:
+            decision = "CHAT"
+            reasoning = "Conversational or general inquiry."
+
+        if decision not in allowed_choices:
+            decision = allowed_choices[0]
+
+        return {
+            "decision": decision,
+            "confidence": 0.96,
+            "reasoning": f"[Strands Decider 2B Offline Simulation]: {reasoning}",
+        }

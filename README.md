@@ -208,6 +208,39 @@ uv run black .
 
 ---
 
+## 🧠 First AI Decision Module: IntentDecider (Strands Decider 2B)
+
+`IntentDecider` is the first production-ready AI decision module in the Cortex AI Decision Engine. It uses **Strands Decider 2B** to determine the single best intent category without any hardcoded rule matching or frontier model generation.
+
+### Why Strands Decider 2B is Used
+- **Sub-50ms Latency**: Frontier models (Claude 3.5 Sonnet, GPT-4) take 800ms-2s just to classify intent. Strands Decider 2B evaluates semantic intent in tens of milliseconds.
+- **Cost Efficiency**: Frontier model token pricing is avoided for routing decisions.
+- **Strict Invariant**: Strands Decider 2B **ONLY** makes decisions; it never generates output responses.
+
+### Strictly Allowed Intent Categories
+Strands Decider 2B evaluates the query and returns **exactly ONE** category:
+1. `CHAT`: Casual conversation, chit-chat, greetings.
+2. `WRITING`: Composition, prose, essays, drafts, or editing.
+3. `CODING`: Programming, software engineering, debugging, scripts, or cloud architecture.
+4. `RESEARCH`: Deep factual discovery, external information synthesis, literature inquiries.
+5. `ANALYSIS`: Comparative critiques, numerical/risk evaluations, financial or logical assessments.
+6. `PLANNING`: Sequential roadmaps, action plans, itineraries, sprint backlogs.
+7. `VISION`: Multimodal image comprehension, OCR, diagram reading.
+
+### Developer Reusability Pattern
+To implement any of the remaining 10 decision modules (e.g. `PrivacyDecider`, `RiskDecider`, `ComplexityDecider`):
+1. Inherit from [`BaseDecisionModule`](src/cortex/infrastructure/deciders/base.py).
+2. Set unique `module_id`, `name`, `decision_type`, and execution `order` (1–11).
+3. Inject [`StrandsDeciderClientProtocol`](src/cortex/domain/protocols/strands_client.py) via `__init__`.
+4. Implement `_compute_decision(state: CortexState)`:
+   - Call `await self.client.decide(...)` with task name and permitted categorical options.
+   - Validate model output strictly (confidence, allowed values).
+   - On error or invalid output, raise domain exception (`DeciderInferenceError`, `DeciderTimeoutError`).
+5. Implement `apply_to_state(state: CortexState, outcome: DecisionOutcome)` to mutate the corresponding field on `CortexState`.
+6. Add the module to [`get_default_decision_modules()`](src/cortex/infrastructure/deciders/registry.py).
+
+---
+
 ## 🗺️ Roadmap: Ready for Upcoming Additions
 
 This foundation is architected to seamlessly accommodate the next implementation phases without structural refactoring:

@@ -9,6 +9,8 @@ from cortex.domain.models import (
     DecisionType,
     GenerationInput,
     GenerationOutcome,
+    IntentCategory,
+    IntentDecisionResult,
     PipelineStatus,
     PrivacyLevel,
     RiskLevel,
@@ -17,6 +19,7 @@ from cortex.domain.models import (
 from cortex.domain.protocols import (
     BedrockClientProtocol,
     DeciderProtocol,
+    DecisionModuleProtocol,
     OrchestratorProtocol,
 )
 
@@ -27,10 +30,13 @@ __all__ = [
     "CostStrategy",
     "DeciderProtocol",
     "DecisionInput",
+    "DecisionModuleProtocol",
     "DecisionOutcome",
     "DecisionType",
     "GenerationInput",
     "GenerationOutcome",
+    "IntentCategory",
+    "IntentDecisionResult",
     "OrchestratorProtocol",
     "PipelineStatus",
     "PrivacyLevel",

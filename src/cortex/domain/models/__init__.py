@@ -2,6 +2,7 @@
 
 from cortex.domain.models.decision import DecisionInput, DecisionOutcome, DecisionType
 from cortex.domain.models.generation import GenerationInput, GenerationOutcome
+from cortex.domain.models.intent import IntentCategory, IntentDecisionResult
 from cortex.domain.models.state import (
     ComplexityLevel,
     CortexState,
@@ -21,6 +22,8 @@ __all__ = [
     "DecisionType",
     "GenerationInput",
     "GenerationOutcome",
+    "IntentCategory",
+    "IntentDecisionResult",
     "PipelineStatus",
     "PrivacyLevel",
     "RiskLevel",

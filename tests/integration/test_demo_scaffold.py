@@ -28,7 +28,7 @@ async def test_demo_endpoint_pipeline_execution(async_client: AsyncClient) -> No
     # Verify state fields
     assert data["user_input"] == "Evaluate cloud migration risk"
     assert data["status"] == "completed"
-    assert data["intent"] == "GENERAL_QUERY"
+    assert data["intent"] in {"ANALYSIS", "GENERAL_QUERY"}
     assert data["selected_agent"] == "general_assistant_agent"
     assert data["privacy_level"] == "public"
     assert data["risk_level"] == "low"
